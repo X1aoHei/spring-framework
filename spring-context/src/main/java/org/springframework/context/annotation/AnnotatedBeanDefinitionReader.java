@@ -82,8 +82,11 @@ public class AnnotatedBeanDefinitionReader {
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
+		//方法的入参是AnnotationConfigApplicationContext
 		this.registry = registry;
+		//处理@Condition
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		//将AnnotationConfigApplicationContext注册
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -212,17 +215,24 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
-
+		//将我们的配置类包装成AnnotatedGenericBeanDefinition，而AnnotatedGenericBeanDefinition是AbstractBeanDefination的子类，
+		//包装的原理就是把AbstractBeanDefination的class设成我们自己定义的配置类，
+		//同时AnnotatedGenericBeanDefinition的成员变量metadata设置成StandardAnnotationMetadata，
+		// 而StandardAnnotationMetadata又保存了我们配置类上面加的注解（通过反射，getAnnotations）
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
 
 		abd.setInstanceSupplier(instanceSupplier);
+		//处理@Scope
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
+		//生成beanName
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 
+		//处理我们配置上面的加的注解，如@Lazy、@DependsOn、@Role、@Description，解析完之后将值设置到AnnotatedBeandefination上面
+		//就是调用setXXX，而这个setXXX就是Beandefination的实现，也就是AbstractBeanDefination
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
@@ -243,6 +253,7 @@ public class AnnotatedBeanDefinitionReader {
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		//处理完注解之后将BeanDefiantion添加到ioc中bdmap中。
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 

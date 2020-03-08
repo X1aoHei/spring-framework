@@ -106,6 +106,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #registerBeanDefinition
 	 * @see #refresh
 	 */
+	//初始化了ioc容器
 	public GenericApplicationContext() {
 		this.beanFactory = new DefaultListableBeanFactory();
 	}

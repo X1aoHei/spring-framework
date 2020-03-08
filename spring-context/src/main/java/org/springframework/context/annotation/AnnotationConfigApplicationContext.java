@@ -83,8 +83,13 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+		//最终初始化了一个AnnotatedBeanDefinitionReader（用于注册bd）、ClassPathBeanDefinitionScanner（用于扫描）
+		//需要注意的是这里也会调用父类的构造方法，而父类构造方法又初始化了ioc容器---->DefaultListableBeanFactory
+		//在初始化reader的时候，会根据本类找到ioc容器，然后向容器中放入了6个类，其中最主要的是ConfigurationClassBeanPostProcessor
 		this();
+		//主要先将注解类上面的注解解析出来。将配置类包装成AnnotatedBeandefination，最后将bd添加到ioc中
 		register(annotatedClasses);
+		//刷新容器
 		refresh();
 	}
 

@@ -1,0 +1,2 @@
+## 什么时候注册的ConfigurationClassPostProcessor？
+在将AnnotationConfigurationApplicationContext注册到ioc容器中时在ioc中添加了几个类，其中一个就是它
