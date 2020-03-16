@@ -271,6 +271,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
+			//checkConfigurationClassCandidate检查bd是不是加了@Configuration注解，
+			//如果加了就setAttribute("org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass","full");
+			//如果没加@configuration注解，那么判断是不是加了下面注解
+			//candidateIndicators.add(Component.class.getName());
+			//candidateIndicators.add(ComponentScan.class.getName());
+			//candidateIndicators.add(Import.class.getName());
+			//candidateIndicators.add(ImportResource.class.getName());
+			//如果加了，就setAttribute("configurationclass","lite")
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
@@ -282,6 +290,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Sort by previously determined @Order value, if applicable
+		//排序
 		configCandidates.sort((bd1, bd2) -> {
 			int i1 = ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
 			int i2 = ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
@@ -289,6 +298,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
+		//得到一个bean名字生成器
 		SingletonBeanRegistry sbr = null;
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
@@ -306,13 +316,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Parse each @Configuration class
+		//实例化ConfigurationClassParser，配置成员变量，为了解析各个配置类
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 
+		//实例化2个set，candidates用于将之前加入的configCandidate去重
+		//alreadyParsed用于判断是否被处理过
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+			//核心，解析配置类
 			parser.parse(candidates);
 			parser.validate();
 

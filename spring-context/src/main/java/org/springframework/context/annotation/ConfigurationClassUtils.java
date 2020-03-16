@@ -109,9 +109,17 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		//判断是否加了@Configuration注解。如果加了spring就会认为他是一个全注解的类。
 		if (isFullConfigurationCandidate(metadata)) {
+			//设置configrationClass属性为full
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		//如果没加@configuration注解，那么判断是不是加了下面注解
+		//candidateIndicators.add(Component.class.getName());
+		//candidateIndicators.add(ComponentScan.class.getName());
+		//candidateIndicators.add(Import.class.getName());
+		//candidateIndicators.add(ImportResource.class.getName());
+		//如果加了，就setAttribute("configurationclass","lite")
 		else if (isLiteConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
