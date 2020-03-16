@@ -112,6 +112,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read {@code configurationModel}, registering bean definitions
 	 * with the registry based on its contents.
 	 */
+	//参数是所有扫描出来beanclass
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
 		for (ConfigurationClass configClass : configurationModel) {
@@ -135,6 +136,8 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		//ConfigurationClass中有一个成员变量----importedBy，记录了被哪个类引入
+		//如果一个类是被import的，那么这个类会被标注
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
@@ -142,7 +145,11 @@ class ConfigurationClassBeanDefinitionReader {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
+		//xml
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		//注册registrar
+		//前面解析配置类的@import的时候处理了ImportBeanDefinitionRegistrar的情况。
+		//是将解析出来的class放到一个configClass的importBeanDefinitionRegistrars属性中去
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 

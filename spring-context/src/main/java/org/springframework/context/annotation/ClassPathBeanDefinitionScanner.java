@@ -272,15 +272,23 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
+			//扫描basePackage下的java文件
+			//符合推荐的转换成bd。通过asm技术
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			//扫描出的bd包装成ScannedGenericBeanDefinition
 			for (BeanDefinition candidate : candidates) {
+				//解析scope属性
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				//由于ScannedGenericBeanDefinition符合AbstractBeanDefinition
 				if (candidate instanceof AbstractBeanDefinition) {
+					//为bd的属性设置一些默认值，比如lazy、initMethod等等
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					//如果这些类是被加了注解的，那么就处理这些注解
+					//@lazy、@Primary、@DependsOn、@Role
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
 				if (checkCandidate(beanName, candidate)) {

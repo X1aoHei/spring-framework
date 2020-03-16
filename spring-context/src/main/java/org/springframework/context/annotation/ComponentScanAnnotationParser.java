@@ -74,6 +74,8 @@ class ComponentScanAnnotationParser {
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
+		//这里需要注意ClassPathBeanDefinitionScanner初始化的时候，其成员变量beanDefinitionDefaults会被初始化。
+		//BeanDefinitionDefaults这个类保存了一些默认值，当扫描包完成之后，被扫描出来的bd的属性就是使用的这几个默认值
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 

@@ -11,6 +11,10 @@ public class Test {
 		context.registerBean(AppConfig.class);
 		//context.registerBean(MyBeanPostProcessor.class);
 		context.refresh();
+		for (String a:
+			 context.getBeanDefinitionNames()) {
+			System.out.println(a);
+		}
 
 		//context.addApplicationListener();
 		//context.registerBean(MyBeanPostProcessor.class);

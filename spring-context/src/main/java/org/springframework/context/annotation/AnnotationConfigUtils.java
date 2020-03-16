@@ -307,6 +307,7 @@ public class AnnotationConfigUtils {
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
 		// Direct annotation present?
+		//metadata.getAnnotationAttributes(annotationClassName, false)获取注解的值
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
 		// Container annotation present?

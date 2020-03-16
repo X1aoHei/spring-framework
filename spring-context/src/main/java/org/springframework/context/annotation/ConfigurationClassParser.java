@@ -184,7 +184,7 @@ class ConfigurationClassParser {
 						"Failed to parse configuration class [" + bd.getBeanClassName() + "]", ex);
 			}
 		}
-
+		//处理延迟加载的import
 		processDeferredImportSelectors();
 	}
 
@@ -248,10 +248,13 @@ class ConfigurationClassParser {
 		//SourceClass也维护了classname和AnnotationM
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
+			//这里sourceclass和configclass都是指的是AppConfig
+			//核心处理内部类、@PropertySource、@ComponentScan、@Import、@ImportResource、@Bean、
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
-
+		//一个map，用来存放扫描出来的bean，注意这里的bean不是对象，仅仅是bean的信息，因为还没有bean的初始化
+		//此方法结束之后，就完成了bean的扫描。
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -268,6 +271,7 @@ class ConfigurationClassParser {
 			throws IOException {
 
 		// Recursively process any member (nested) classes first
+		//处理内部类
 		processMemberClasses(configClass, sourceClass);
 
 		// Process any @PropertySource annotations
@@ -290,9 +294,11 @@ class ConfigurationClassParser {
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				//扫描普通类
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
+				//检查出来的类中是否含有@Configration
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
 					if (bdCand == null) {
@@ -306,6 +312,8 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @Import annotations
+
+		//处理@Import
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// Process any @ImportResource annotations
@@ -449,6 +457,7 @@ class ConfigurationClassParser {
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 
 		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");
+		//DefaultPropertySourceFactory
 		PropertySourceFactory factory = (factoryClass == PropertySourceFactory.class ?
 				DEFAULT_PROPERTY_SOURCE_FACTORY : BeanUtils.instantiateClass(factoryClass));
 
@@ -608,10 +617,17 @@ class ConfigurationClassParser {
 			this.importStack.push(configClass);
 			try {
 				for (SourceClass candidate : importCandidates) {
+					//如果@import的值是一个ImportSelector实现类，那么就反射除这个类的对象，并且调用importSelectors拿到返回值，
+					//拿到返回值是一个个的类名，然后将这些类包装成SourceClass，并且递归调用这些类，
+					//如果这些类不是importSelector、ImportBeanDefinitionRegistrar的实现类，
+					//那么就会去调用processConfigurationClass，把这些类当作@Configuration配置类来处理
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
+						//处理ImportSelector
 						Class<?> candidateClass = candidate.loadClass();
+						//反射初始化这个类
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
+						//处理Aware
 						ParserStrategyUtils.invokeAwareMethods(
 								selector, this.environment, this.resourceLoader, this.registry);
 						if (this.deferredImportSelectors != null && selector instanceof DeferredImportSelector) {
@@ -621,9 +637,11 @@ class ConfigurationClassParser {
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
+							//递归处理返回值的类
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
+					//处理ImportBeanDefinitionRegistrar
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -637,6 +655,7 @@ class ConfigurationClassParser {
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
+						//最后一次递归表示这个类不是importSelector和ImportBeanDefinitionRegistrar的实现类，那么就按照@Configuration来进行处理
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass));
@@ -735,6 +754,7 @@ class ConfigurationClassParser {
 				throw new NestedIOException("Failed to load class [" + className + "]", ex);
 			}
 		}
+		//CachingMetadataReaderFactory================this.metadataReaderFactory
 		return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
 	}
 
