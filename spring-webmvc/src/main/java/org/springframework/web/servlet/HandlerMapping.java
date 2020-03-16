@@ -53,6 +53,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
  */
+	//确定handle的类型
+	//1.method
+	//2.bean
 public interface HandlerMapping {
 
 	/**

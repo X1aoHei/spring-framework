@@ -844,6 +844,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			for (String className : classNames) {
 				try {
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+					//根据class。放到ioc种
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}
@@ -957,10 +958,13 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
+				//处理文件上传，检查请求中是否有文件上传操作
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
+				//确定当前请求的处理程序
+				//推断controller的类型和handler的类型
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -968,6 +972,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				//如果HandlerExecutionChain是bean，那么getHandler返回的就是一个对象，
+				//如果是方法，返回的是method
+				//交给HandlerAdapter处理，HandlerExecutionChain只是确定是什么类型。
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -983,11 +990,13 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				//拦截器处理 前置拦截处理
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				//反射调用
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
@@ -995,6 +1004,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				applyDefaultViewName(processedRequest, mv);
+				//后置处理
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1180,6 +1190,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		if (this.handlerMappings != null) {
+			//有3种Controller，一个是加了Controller注解的，另一种是继承了Controller接口的（@Component("/XXX")），还有一种是实现HttpRequestHandler（@Component("/XXX")）
+			//这3种是以key为url，value为方法或者类来进行存储的，也就是2种Map，所以这里要遍历2种。BeanNameUrlHandlerMapping、RequestMappingHandlerMapping
 			for (HandlerMapping hm : this.handlerMappings) {
 				if (logger.isTraceEnabled()) {
 					logger.trace(

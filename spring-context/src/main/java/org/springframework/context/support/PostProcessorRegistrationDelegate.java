@@ -82,12 +82,17 @@ final class PostProcessorRegistrationDelegate {
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+					//容器中只有实现了PriorityOrdered接口和BeanDefinitionRegistryPostProcessor接口的类才添加到currentRegistryProcessors中
+					//ConfigurationClassPostProcessor
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
 			}
+			//对currentRegistryProcessors中的bd进行排序
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
+			//调用方法
+			//注意这里调用BeanDefinitionRegistryPostProcessor的实现类（ConfigurationClassPostProcessor）的方法，在调用的时候又回去解析配置类注解等等。
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
@@ -253,6 +258,9 @@ final class PostProcessorRegistrationDelegate {
 	private static void sortPostProcessors(List<?> postProcessors, ConfigurableListableBeanFactory beanFactory) {
 		Comparator<Object> comparatorToUse = null;
 		if (beanFactory instanceof DefaultListableBeanFactory) {
+			//AnnotationConfigUtils.registerAnnotationConfigProcessors
+			//这里DefaultListableBeanFactory中的dependencyComparator是在注册AnnotationConfigApplicationContext的时候（）初始化的。
+			//也就是AnnotationAwareOrderComparator类
 			comparatorToUse = ((DefaultListableBeanFactory) beanFactory).getDependencyComparator();
 		}
 		if (comparatorToUse == null) {

@@ -86,7 +86,7 @@ public class AnnotatedBeanDefinitionReader {
 		this.registry = registry;
 		//处理@Condition
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
-		//将AnnotationConfigApplicationContext注册
+		//将AnnotationConfigApplicationContext注册,注意不会把registry放到bdmap中
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 

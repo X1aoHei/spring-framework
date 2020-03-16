@@ -188,6 +188,8 @@ abstract class ConfigurationClassUtils {
 	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
 	 */
 	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
+		//full -------------CONFIGURATION_CLASS_FULL
+		//ConfigurationClassPostProcessor.configurationClass
 		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
 	}
 
