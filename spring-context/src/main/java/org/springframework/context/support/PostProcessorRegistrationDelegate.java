@@ -192,12 +192,18 @@ final class PostProcessorRegistrationDelegate {
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
+		//已经有三个了
+		//AutowiredAnnotationProcessor、RequiredAnnotationProcessor、CommonAnnotationProcessor，这里获取的是从bdmap中获取。
+		//this.reader -------- ..........在初始化reader的时候，加进去的
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		//getBeanPostProcessorCount方法是从beanfactory的beanPostProcessors属性中获取。
+		//refresh-------prepareBeanFactory的时候加进去的
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
+		//count = 7
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
@@ -310,6 +316,9 @@ final class PostProcessorRegistrationDelegate {
 	 * BeanPostProcessor that logs an info message when a bean is created during
 	 * BeanPostProcessor instantiation, i.e. when a bean is not eligible for
 	 * getting processed by all BeanPostProcessors.
+	 * 当spring的配置中后置处理器还没有被注册就已经开始了bean的初始化
+	 * 判断bean初始化是否经过后置处理器
+	 * 便会打印出beanpostprocessorchecker中设定的信息
 	 */
 	private static final class BeanPostProcessorChecker implements BeanPostProcessor {
 

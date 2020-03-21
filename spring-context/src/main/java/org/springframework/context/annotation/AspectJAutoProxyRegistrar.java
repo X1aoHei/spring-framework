@@ -42,6 +42,8 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 	public void registerBeanDefinitions(
 			AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
+		//向beanfactory中加入AnnotationAwareAspectJAutoProxyCreator,放到bdmap中，也是一个beanpostprocessor
+		//后续会把它放到beanPostProcessors中，是一个CopyOnWriteArrayList
 		AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
 		AnnotationAttributes enableAspectJAutoProxy =

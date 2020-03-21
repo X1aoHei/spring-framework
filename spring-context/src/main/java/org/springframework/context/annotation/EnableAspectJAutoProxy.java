@@ -120,6 +120,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(AspectJAutoProxyRegistrar.class)
+//beandefination------->bean------>实例--------->postprocessor（AnnotationAwareAspectJAutoProxyCreator）--------->proxy------>property
 public @interface EnableAspectJAutoProxy {
 
 	/**

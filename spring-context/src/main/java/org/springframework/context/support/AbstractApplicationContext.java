@@ -523,6 +523,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
+			//向beanfactory注入一些bean，processor。这些processor会在下面的registerBeanPostProcessors使用
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -539,10 +540,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
+				//国际化
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
-				//时间分发器
+				//事件分发器
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
@@ -553,6 +555,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				//明星类：AnnotationAwareAspectJAutoProxyCreator
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
