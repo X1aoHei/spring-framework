@@ -21,7 +21,7 @@ import org.springframework.lang.Nullable;
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
- *
+ * 类型转换
  * @author Keith Donald
  * @author Phillip Webb
  * @since 3.0
@@ -41,6 +41,7 @@ public interface ConversionService {
 	 * @param targetType the target type to convert to (required)
 	 * @return {@code true} if a conversion can be performed, {@code false} if not
 	 * @throws IllegalArgumentException if {@code targetType} is {@code null}
+	 * 是否支持原类型到目标类型的转换
 	 */
 	boolean canConvert(@Nullable Class<?> sourceType, Class<?> targetType);
 
@@ -61,6 +62,7 @@ public interface ConversionService {
 	 * @return {@code true} if a conversion can be performed between the source and target types,
 	 * {@code false} if not
 	 * @throws IllegalArgumentException if {@code targetType} is {@code null}
+	 * 是否支持原类型到目标类型的转换
 	 */
 	boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
@@ -71,6 +73,10 @@ public interface ConversionService {
 	 * @return the converted object, an instance of targetType
 	 * @throws ConversionException if a conversion exception occurred
 	 * @throws IllegalArgumentException if targetType is {@code null}
+	 */
+	/**
+	 * 将source实例转成目标类型，如果转换过程出错，抛出 ConversionException，
+	 * 如果 targetType 为null，抛出 IllegalArgumentException
 	 */
 	@Nullable
 	<T> T convert(@Nullable Object source, Class<T> targetType);
@@ -87,6 +93,10 @@ public interface ConversionService {
 	 * @throws ConversionException if a conversion exception occurred
 	 * @throws IllegalArgumentException if targetType is {@code null},
 	 * or {@code sourceType} is {@code null} but source is not {@code null}
+	 */
+	/**
+	 * 将source实例转成目标类型，如果转换过程出错，抛出 ConversionException，
+	 * 如果 targetType 为null，抛出 IllegalArgumentException
 	 */
 	@Nullable
 	Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);

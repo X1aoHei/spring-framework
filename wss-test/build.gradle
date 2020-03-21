@@ -13,6 +13,9 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    // https://mvnrepository.com/artifact/cglib/cglib-nodep
+    // https://mvnrepository.com/artifact/cglib/cglib
+    testCompile group: 'cglib', name: 'cglib', version: '3.3.0'
     compile project(":spring-core")
     compile project(":spring-context")
 }

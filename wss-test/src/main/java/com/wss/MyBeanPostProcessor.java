@@ -5,6 +5,8 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.context.weaving.LoadTimeWeaverAware;
+import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,4 +22,6 @@ public class MyBeanPostProcessor implements BeanDefinitionRegistryPostProcessor 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		System.out.println("1233");
 	}
+
+
 }

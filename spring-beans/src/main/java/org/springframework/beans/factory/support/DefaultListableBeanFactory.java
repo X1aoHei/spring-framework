@@ -25,6 +25,7 @@ import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -729,8 +730,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
 		// Trigger initialization of all non-lazy singleton beans...
+		//触发非延迟加载的单例beans的实力胡啊，主要步骤为getBean方法
 		for (String beanName : beanNames) {
+			//合并父bd，子bd继承父bd的情况，主要是一些属性。主要是
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			//不是抽象类、单例的、不是懒加载的
+			//判断一个类是不是抽象类
+			//Class<?> targetType = bd.getTargetType();
+			//boolean anAbstract = Modifier.isAbstract(targetType.getModifiers());
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 				if (isFactoryBean(beanName)) {
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);

@@ -11,4 +11,8 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:application.properties")
 @Import(MyImportSelector.class)
 public class AppConfig {
+	public String say(){
+		System.out.println("123");
+		return "result";
+	}
 }
