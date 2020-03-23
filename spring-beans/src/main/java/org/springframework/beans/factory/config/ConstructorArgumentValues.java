@@ -43,8 +43,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ConstructorArgumentValues {
 
+	//如果是xml中定义了constructor-arg，那么这里就需要map
 	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>();
-
+	//如果只是简单的方法参数，就用list
 	private final List<ValueHolder> genericArgumentValues = new ArrayList<>();
 
 

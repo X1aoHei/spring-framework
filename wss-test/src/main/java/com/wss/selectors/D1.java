@@ -1,4 +1,4 @@
 package com.wss.selectors;
 
-public class D1 {
+public interface D1 {
 }

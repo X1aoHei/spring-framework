@@ -114,16 +114,23 @@ class ConstructorResolver {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
+		//要使用哪个构造方法
 		Constructor<?> constructorToUse = null;
+		//构造方法使用哪些参数
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
-
+		//argsHolderToUse可以有2种方法设置
+		//1.通过bd设置
+		//2.通过xml中constructor-arg设置
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
 		}
 		else {
 			Object[] argsToResolve = null;
 			synchronized (mbd.constructorArgumentLock) {
+				//获取已解析的构造方法
+				//一般不会有，因为构造方法会提供一个
+				//除非有多个，那么才会存在已经解析完成的构造方法
 				constructorToUse = (Constructor<?>) mbd.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse != null && mbd.constructorArgumentsResolved) {
 					// Found a cached constructor...
@@ -139,16 +146,24 @@ class ConstructorResolver {
 		}
 
 		if (constructorToUse == null) {
+			//如果没有已经解析的构造方法
+			// 则需要去解析构造方法
 			// Need to resolve the constructor.
+			//判断构造方法是否为空，判断是否根据构造方法自动注入
 			boolean autowiring = (chosenCtors != null ||
 					mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 			ConstructorArgumentValues resolvedValues = null;
 
+			//定义最小参数个数
+			//如果你给构造方法的参数列表给定了具体的值
+			//那么这些值的个数就是构造方法参数的个数
 			int minNrOfArgs;
 			if (explicitArgs != null) {
 				minNrOfArgs = explicitArgs.length;
 			}
 			else {
+				//实例化一个对象来存放构造方法的参数值
+				//当中主要存放参数值和参数值所对应的下标
 				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
 				resolvedValues = new ConstructorArgumentValues();
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
@@ -168,7 +183,14 @@ class ConstructorResolver {
 							"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 				}
 			}
+			//给构造方法排序
+			//排序规则： 访问限制符号 > 参数列表
+			//public Object(arg1,arg2,arg3)
+			//public Object(arg1,arg2)
+			//protected Object(arg1,arg2)
+			//protected Object(arg1)
 			AutowireUtils.sortConstructors(candidates);
+			//定义一个差异变量，这个变量很有分量，后面有注释
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
 			LinkedList<UnsatisfiedDependencyException> causes = null;
@@ -188,6 +210,9 @@ class ConstructorResolver {
 				ArgumentsHolder argsHolder;
 				if (resolvedValues != null) {
 					try {
+						//判断是否加了ConstructorProperties注解如果加了则把值取出来
+						//可以写个代码测试一下
+						//@ConstructorProperties({"service","hello"})给构造函数的参数设置值
 						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, paramTypes.length);
 						if (paramNames == null) {
 							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();

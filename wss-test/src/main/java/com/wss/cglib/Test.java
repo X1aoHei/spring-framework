@@ -12,19 +12,19 @@ public class Test {
 		enhancer.setSuperclass(AppConfig.class);
 		enhancer.setCallback(new MyMethodInterceptor());
 		AppConfig o = (AppConfig) enhancer.create();
-		o.say();
+		//o.say();
 
 
 		BeanGenerator beanGenerator = new BeanGenerator();
 		beanGenerator.setSuperclass(AppConfig.class);
 		beanGenerator.addProperty("aaa",String.class);
 		AppConfig appConfig = (AppConfig)beanGenerator.create();
-		appConfig.say();
+		//appConfig.say();
 
-		BeanMap beanmap = BeanMap.create(new AppConfig());
+		/*BeanMap beanmap = BeanMap.create(new AppConfig());
 		beanmap.put("key","value");
 		beanmap.setBean(new AppConfig());
-		System.out.println(beanmap.get("key"));
+		System.out.println(beanmap.get("key"));*/
 
 	}
 }

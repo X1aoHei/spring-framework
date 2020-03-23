@@ -1,18 +1,14 @@
 package com.wss;
 
+import com.wss.selectors.D1;
 import com.wss.selectors.MyImportSelector;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
+import com.wss.selectors.d2;
+import org.springframework.context.annotation.*;
 
 @Configuration
 @ComponentScan("com.wss")
 @PropertySource("classpath:application.properties")
 @Import(MyImportSelector.class)
 public class AppConfig {
-	public String say(){
-		System.out.println("123");
-		return "result";
-	}
+
 }

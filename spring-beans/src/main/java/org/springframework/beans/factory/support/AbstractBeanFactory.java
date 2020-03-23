@@ -244,7 +244,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
-		//先拿一遍，看看有没有
+		//先拿一遍，看看有没有,判断这个对象是否被实例化好了
+		//从spring的bean容器中获取一个bean，defaultlistablebeanfactory中有一个属性叫做singletonObjects(他是一个map），就是从map中获取
+		//由于方法会在spring环境初始化的时候（就是对象被创建的时候调用一次）调用一次
+		//还会再getBean的时候被调用一次
+		//所以再调试的时候断点不会走这里
+		//需要先进入到applicationContext.getBean("xxx")之后u才能走到这个断点。
+		//对象被初始化的时候一般是null
+		//对于lazy=true的类来说他是懒加载的，只有在getBean的时候才能初始化。
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isDebugEnabled()) {
@@ -256,6 +263,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			//如果sharedInstance不是空的，下面方法直接返回，但如果是factorybean，则需要调用getObject工厂获取真正的bean实例。
+			//如果用户想获取factorybean本身，这里也不会做特别的处理，直接返回即可。毕竟factorybean的实现类也是一种bean。
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
@@ -270,6 +279,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			// Check if bean definition exists in this factory.
+			//自定义的parentbeanfactory
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
@@ -291,6 +301,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			//检查
 			//false
 			if (!typeCheckOnly) {
+				//添加到一个alreadyCreated set集合中，表示它已经被创建过一次
 				markBeanAsCreated(beanName);
 			}
 
@@ -299,6 +310,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				//处理depends On
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {

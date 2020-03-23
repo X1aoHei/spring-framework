@@ -147,6 +147,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param beanName the name of the bean
 	 * @param singletonFactory the factory for the singleton object
 	 */
+	//1.bean被new出来
+	//2.bean被放到singletonFactories map中
+	//3.bean被放到一个earlySingletonObjects  map中
+	//4.最终放到singletonObjects  map中
 	protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
 		synchronized (this.singletonObjects) {
@@ -174,6 +178,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		//微观方面的ioc容器singletonObjects（ConcurrentHashMap）
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
@@ -213,6 +218,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				//检查inCreationCheckExclusions中有没有这个beanname，如果没有就将beanname添加到singletonsCurrentlyInCreation中，表示这个bean正在处理
 				beforeSingletonCreation(beanName);
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
@@ -221,6 +227,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				}
 				try {
 					//可能是代理对象，执行代理的过程
+					//getObject方法是一个lamba，调用了createBean方法
 					singletonObject = singletonFactory.getObject();
 					newSingleton = true;
 				}
